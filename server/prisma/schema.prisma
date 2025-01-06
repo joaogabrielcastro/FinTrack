@@ -1,0 +1,118 @@
+// Gerador de client para o prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuração do banco de dados (provedor e url de conexão)
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define os tipos de Usuario que vão ser usados
+enum TipoUsuario {
+  ADMINISTRADOR
+  EMPREGADO
+  ESTAGIARIO
+}
+
+//Modelo de tabela do banco de dados Usuario
+model Usuario {
+  id           Int         @id @default(autoincrement())
+  nome         String
+  email        String      @unique
+  senha        String
+  tipo         TipoUsuario
+  clienteId    Int?
+  empregadoId  Int?
+  empregado    Empregado?  @relation(fields: [empregadoId], references: [id])
+  estagiarioId Int?
+  estagiario   Estagiario? @relation(fields: [estagiarioId], references: [id])
+}
+
+//Modelo de tabela do banco de dados Filial
+model Filial {
+  id          Int          @id @default(autoincrement())
+  nome        String
+  tipo        String
+  emprestimos Emprestimo[]
+  empregados  Empregado[]
+  estagiarios Estagiario[]
+  clientes    Cliente[]
+}
+
+//Modelo de tabela do banco de dados Cliente
+model Cliente {
+  id          Int          @id @default(autoincrement())
+  descricao   String
+  nomeEmpresa String
+  cnpj        String       @unique
+  filialId    Int
+  filial      Filial       @relation(fields: [filialId], references: [id])
+  contatos    Contato[]
+  emprestimos Emprestimo[]
+  periodicos  Periodico[]
+}
+
+//Modelo de tabela do banco de dados Contato
+model Contato {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  telefone  String
+  clienteId Int
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+}
+
+//Modelo de tabela do banco de dados Empregado
+model Empregado {
+  id          Int          @id @default(autoincrement())
+  nome        String
+  email       String       @unique
+  telefone    String
+  endereco    String
+  filialId    Int
+  filial      Filial       @relation(fields: [filialId], references: [id])
+  estagiarios Estagiario[]
+  Usuario     Usuario[]
+}
+
+//Modelo de tabela do banco de dados Estagiario
+model Estagiario {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  email       String    @unique
+  nomeCurso   String
+  dataInicio  DateTime
+  responsavel String
+  empregadoId Int
+  filialId    Int
+  filial      Filial    @relation(fields: [filialId], references: [id])
+  empregado   Empregado @relation(fields: [empregadoId], references: [id])
+  Usuario     Usuario[]
+}
+
+//Modelo de tabela do banco de dados Periodico
+model Periodico {
+  id          Int          @id @default(autoincrement())
+  nomeRevista String
+  autor       String
+  editora     String
+  exemplar    String
+  clienteId   Int
+  cliente     Cliente      @relation(fields: [clienteId], references: [id])
+  Emprestimo  Emprestimo[]
+}
+
+//Modelo de tabela do banco de dados Emprestimo
+model Emprestimo {
+  id             Int       @id @default(autoincrement())
+  nomeUsuario    String
+  dataEmprestimo DateTime
+  dataDevolucao  DateTime
+  clienteId      Int
+  cliente        Cliente   @relation(fields: [clienteId], references: [id])
+  filialId       Int
+  filial         Filial    @relation(fields: [filialId], references: [id])
+  periodicoId    Int
+  periodico      Periodico @relation(fields: [periodicoId], references: [id])
+}

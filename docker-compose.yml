@@ -1,0 +1,19 @@
+version: '24.0'
+
+services:
+  database:
+    image: postgres:latest
+    container_name: fintrack
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+    - POSTGRES_USER=docker
+    - POSTGRES_PASSWORD=docker
+    - POSTGRES_DB=fintrack
+    volumes:
+    - pgdata:/data/postgres
+
+volumes:
+  pgdata:
+    driver: local
